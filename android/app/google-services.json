@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "964697908697",
+    "project_id": "bitezz-fcaf0",
+    "storage_bucket": "bitezz-fcaf0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:964697908697:android:da7532937b506daf6b25c8",
+        "android_client_info": {
+          "package_name": "com.example.bitez"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVQ6geX9gv8TTX-PzJKUY1ykSrnbdM030"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
