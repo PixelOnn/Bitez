@@ -21,10 +21,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       final phoneNumber = _phoneController.text.trim();
 
+      // Pass the existing _authController instance
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => OtpScreen(phoneNumber: phoneNumber),
+          builder: (context) => OtpScreen(
+            phoneNumber: phoneNumber,
+            authController: _authController, // Pass the instance here
+          ),
         ),
       );
       _authController.sendOtp(context, phoneNumber);
@@ -33,6 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ... your build method remains the same
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -45,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Center(
                     child: Lottie.asset(
-                      'assets/animations/otp_security.json',
+                      'assets/animations/Verification Code.json',
                       height: 250,
                     ),
                   ),
@@ -56,7 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-
                     "Enter your phone number",
                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
@@ -72,7 +76,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: const InputDecoration(
                       hintText: "99999 99999",
                       prefixIcon: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 12),
                         child: Text("+91", style: TextStyle(fontSize: 16)),
                       ),
                     ),

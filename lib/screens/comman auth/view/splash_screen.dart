@@ -65,16 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
           // Skip Button overlayed on the bottom right
           Align(
             alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 20.0),
-              child: TextButton(
-                onPressed: _navigateToLogin, // Navigate when pressed
-                child: const Text(
-                  'Skip',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              ),
-            ),
+
           ),
         ],
       ),
