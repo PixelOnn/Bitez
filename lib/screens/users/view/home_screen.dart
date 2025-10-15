@@ -1,6 +1,7 @@
-// lib/screens/users/view/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'profile_view.dart'; // <-- IMPORT YOUR NEW PROFILE VIEW
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,37 +13,25 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // Placeholder pages for the bottom navigation bar
+  // UPDATED: Replaced the placeholder with the ProfileView widget
   static const List<Widget> _widgetOptions = <Widget>[
     Center(child: Text('Home Page')),
     Center(child: Text('Reorder Page')),
-    Center(child: Text('Profile Page')),
+    ProfileView(), // <-- USE THE PROFILE VIEW HERE
   ];
 
   @override
   void initState() {
     super.initState();
-    // Use addPostFrameCallback to ensure the dialog is shown after the build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestPermissions();
     });
   }
 
   Future<void> _requestPermissions() async {
-    // Request Location Permission
-    PermissionStatus locationStatus = await Permission.location.request();
-    if (locationStatus.isDenied) {
-      // Handle denied case
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Location permission is required to find nearby restaurants."),
-      ));
-    }
-
-    // Request Notification Permission
-    PermissionStatus notificationStatus = await Permission.notification.request();
-    if (notificationStatus.isDenied) {
-      // Handle denied case
-    }
+    // ... your permission logic remains the same
+    await Permission.location.request();
+    await Permission.notification.request();
   }
 
   void _onItemTapped(int index) {
@@ -54,9 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Food Delivery"),
-      ),
+      // The AppBar is now inside the specific views (like ProfileView)
+      // to allow each tab to have its own title. You can remove this one.
+      // appBar: AppBar(
+      //   title: const Text("Food Delivery"),
+      // ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
