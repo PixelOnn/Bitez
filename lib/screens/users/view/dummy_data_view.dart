@@ -1,0 +1,55 @@
+import '../model/restaurant_model.dart';
+
+// A list of real restaurants from Kangeyam to make the app feel authentic
+final List<RestaurantModel> dummyRestaurants = [
+  RestaurantModel(
+    id: '1',
+    name: 'Hotel Surya Pure Veg',
+    imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=80',
+    cuisine: ['South Indian', 'Pure Veg', 'Dosa'],
+    rating: 3.8,
+    deliveryTime: '20-25 min',
+    priceRange: '₹',
+    address: 'Nagapattinam - Coimbatore Hwy, Kangayam',
+  ),
+  RestaurantModel(
+    id: '2',
+    name: 'Taj Biryani',
+    imageUrl: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&q=80',
+    cuisine: ['Biryani', 'Non-Veg', 'South Indian'],
+    rating: 4.2,
+    deliveryTime: '25-30 min',
+    priceRange: '₹₹',
+    address: 'Tiruppur Kangayam Road, Sivanmalai',
+  ),
+  RestaurantModel(
+    id: '3',
+    name: 'Hotel Amirtha',
+    imageUrl: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400&q=80',
+    cuisine: ['Pure Veg', 'North Indian', 'Chinese'],
+    rating: 4.5,
+    deliveryTime: '30-35 min',
+    priceRange: '₹₹',
+    address: 'Dharapuram road, Near police station, Kangayam',
+  ),
+  RestaurantModel(
+    id: '4',
+    name: 'Kavi Restaurant',
+    imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80',
+    cuisine: ['South Indian', 'Chettinad'],
+    rating: 3.7,
+    deliveryTime: '20-25 min',
+    priceRange: '₹',
+    address: 'Dharapuram Road, Kangayam',
+  ),
+  RestaurantModel(
+    id: '5',
+    name: 'Sivamalai Mess',
+    imageUrl: 'https://images.unsplash.com/photo-1626078303126-4b8c04917845?w=400&q=80',
+    cuisine: ['Mess', 'Non-Veg', 'Local'],
+    rating: 4.1,
+    deliveryTime: '15-20 min',
+    priceRange: '₹',
+    address: 'Andimadakkadu, Kangayam',
+  ),
+];

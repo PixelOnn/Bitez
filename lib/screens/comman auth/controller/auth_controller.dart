@@ -6,7 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart'; // <-- ADD THIS IMP
 import 'package:device_info_plus/device_info_plus.dart'; // <-- ADD THIS IMPORT
 
 import '../../users/model/user_model.dart' as AppUser;
-import '../../users/view/home_screen.dart';
+import '../../users/view/bottom_navbar.dart';
 
 class AuthController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
