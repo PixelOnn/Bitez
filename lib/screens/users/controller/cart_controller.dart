@@ -1,75 +1,85 @@
+
 import 'package:flutter/material.dart';
+
 import '../model/cart_items_model.dart';
 import '../model/dishes_model.dart';
 
-class CartController extends ChangeNotifier {
-  final List<CartItemModel> _cartItems = [];
+class CartController with ChangeNotifier {
+  final List<CartItemModel> _items = [];
 
-  List<CartItemModel> get cartItems => List.unmodifiable(_cartItems);
+  List<CartItemModel> get items => _items;
 
-  int get totalItemsInCart => _cartItems.fold(0, (sum, item) => sum + item.quantity);
-
-  double get cartTotalPrice => _cartItems.fold(0.0, (sum, item) => sum + item.totalPrice);
-
-  void addItemToCart(DishModel dish) {
-    int existingIndex = _cartItems.indexWhere((item) => item.dish.id == dish.id);
-
-    if (existingIndex != -1) {
-      // If dish already exists, increment quantity
-      _cartItems[existingIndex].quantity++;
-    } else {
-      // If new dish, add to cart
-      _cartItems.add(CartItemModel(dish: dish, quantity: 1));
+  // Calculates the total number of items for the badge
+  int get totalItemsInCart {
+    int totalItems = 0;
+    for (var item in _items) {
+      totalItems += item.quantity;
     }
-    notifyListeners();
+    return totalItems;
   }
 
-  void incrementQuantity(String dishId) {
-    int index = _cartItems.indexWhere((item) => item.dish.id == dishId);
-    if (index != -1) {
-      _cartItems[index].quantity++;
-      notifyListeners();
+  // --- NEW METHOD TO FIX THE ERROR ---
+  // Calculates the total price for the payment button
+  double getTotalPrice() {
+    double total = 0.0;
+    for (var item in _items) {
+      total += item.dish.price * item.quantity;
     }
+    return total;
   }
+  // ------------------------------------
 
-  void decrementQuantity(String dishId) {
-    int index = _cartItems.indexWhere((item) => item.dish.id == dishId);
-    if (index != -1) {
-      if (_cartItems[index].quantity > 1) {
-        _cartItems[index].quantity--;
-      } else {
-        // If quantity is 1, remove item from cart
-        _cartItems.removeAt(index);
-      }
-      notifyListeners();
-    }
-  }
-
-  void removeItemFromCart(String dishId) {
-    _cartItems.removeWhere((item) => item.dish.id == dishId);
-    notifyListeners();
-  }
-
-  void clearCart() {
-    _cartItems.clear();
-    notifyListeners();
-  }
-
-  // Helper to check if a dish is in the cart and get its quantity
+  // Gets the quantity of a specific dish
   int getDishQuantityInCart(String dishId) {
-    final item = _cartItems.firstWhereOrNull((item) => item.dish.id == dishId);
-    return item?.quantity ?? 0;
+    try {
+      return _items.firstWhere((item) => item.dish.id == dishId).quantity;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // Adds an item to the cart or increases its quantity
+  void addItemToCart(DishModel dish) {
+    int existingIndex = _items.indexWhere((item) => item.dish.id == dish.id);
+    if (existingIndex != -1) {
+      _items[existingIndex].quantity++;
+    } else {
+      _items.add(CartItemModel(dish: dish));
+    }
+    notifyListeners();
+  }
+
+  // Decreases an item's quantity or removes it
+  void removeItemFromCart(String dishId) {
+    int existingIndex = _items.indexWhere((item) => item.dish.id == dishId);
+    if (existingIndex != -1) {
+      if (_items[existingIndex].quantity > 1) {
+        _items[existingIndex].quantity--;
+      } else {
+        _items.removeAt(existingIndex);
+      }
+      notifyListeners();
+    }
+  }
+
+  // Increases an item's quantity
+  void incrementItemQuantity(String dishId) {
+    int existingIndex = _items.indexWhere((item) => item.dish.id == dishId);
+    if (existingIndex != -1) {
+      _items[existingIndex].quantity++;
+      notifyListeners();
+    }
+  }
+
+  // Decreases an item's quantity (same as removeItemFromCart)
+  void decrementItemQuantity(String dishId) {
+    removeItemFromCart(dishId);
+  }
+
+  // Clears the entire cart
+  void clearCart() {
+    _items.clear();
+    notifyListeners();
   }
 }
 
-// Extension to add firstWhereOrNull (similar to Kotlin's find)
-extension IterableExtension<T> on Iterable<T> {
-  T? firstWhereOrNull(bool Function(T element) test) {
-    for (var element in this) {
-      if (test(element)) {
-        return element;
-      }
-    }
-    return null;
-  }
-}

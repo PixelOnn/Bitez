@@ -2,7 +2,7 @@ import 'package:bitez/screens/users/view/profile_view.dart';
 import 'package:bitez/screens/users/view/restaurant_card._viewdart.dart';
 import 'package:flutter/material.dart';
 import '../controller/home_controller.dart';
-import 'category_item.dart';
+import 'category_item_view.dart';
 import 'dummy_data_view.dart';
 
 class HomeView extends StatefulWidget {

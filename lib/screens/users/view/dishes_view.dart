@@ -1,15 +1,13 @@
 import 'package:bitez/screens/users/controller/cart_controller.dart';
+import 'package:bitez/screens/users/model/dishes_model.dart';
+import 'package:bitez/screens/users/model/restaurant_model.dart';
 import 'package:bitez/screens/users/view/cart_view.dart';
+import 'package:bitez/screens/users/view/dummy_data_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../model/dishes_model.dart';
-import '../model/restaurant_model.dart';
-import 'dummy_data_view.dart';
-import 'orders_view.dart';
 
 class DishesView extends StatefulWidget {
   final RestaurantModel restaurant;
-
   const DishesView({super.key, required this.restaurant});
 
   @override
@@ -22,11 +20,120 @@ class _DishesViewState extends State<DishesView> {
   @override
   void initState() {
     super.initState();
-    _dishes = dummyDishes.where((dish) => dish.restaurantId == widget.restaurant.id).toList();
+    // Correctly filter dishes by comparing the restaurant's ID
+    _dishes = dummyDishes
+        .where((dish) => dish.restaurant.id == widget.restaurant.id)
+        .toList();
+  }
+
+  // --- NEW METHOD to show the bottom sheet ---
+  void _showDishDetails(DishModel dish) {
+    final cartController = Provider.of<CartController>(context, listen: false);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows the sheet to be taller
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        // Use a Consumer to rebuild the sheet's state independently
+        return Consumer<CartController>(
+          builder: (context, cart, child) {
+            final quantity = cart.getDishQuantityInCart(dish.id);
+            return Wrap(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.network(
+                      dish.imageUrl,
+                      height: 250,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            dish.name,
+                            style: const TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '₹${dish.price.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                                fontSize: 20, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            dish.description,
+                            style:
+                            TextStyle(fontSize: 16, color: Colors.grey[700]),
+                          ),
+                          const SizedBox(height: 24),
+                          Center(
+                            child: quantity == 0
+                                ? SizedBox(
+                              width: 200,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  cartController.addItemToCart(dish);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 14)
+                                ),
+                                child: const Text("ADD TO CART"),
+                              ),
+                            )
+                                : Container(
+                              width: 200,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade400),
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: () =>
+                                        cartController.removeItemFromCart(dish.id),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(quantity.toString(),
+                                      style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold)),
+                                  const SizedBox(width: 10),
+                                  IconButton(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: () =>
+                                        cartController.addItemToCart(dish),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final cartController = Provider.of<CartController>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.restaurant.name),
@@ -34,206 +141,145 @@ class _DishesViewState extends State<DishesView> {
       body: Stack(
         children: [
           ListView.builder(
-            padding: const EdgeInsets.only(bottom: 80), // Add padding to avoid overlap with cart banner
             itemCount: _dishes.length,
+            padding: EdgeInsets.only(
+                bottom: cartController.items.isNotEmpty ? 80 : 0),
             itemBuilder: (context, index) {
               final dish = _dishes[index];
-              return DishCard(
-                dish: dish,
-              );
-            },
-          ),
-          Consumer<CartController>(
-            builder: (context, cartController, child) {
-              if (cartController.totalItemsInCart > 0) {
-                return Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CartView()),
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.all(16.0),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '${cartController.totalItemsInCart} Item${cartController.totalItemsInCart > 1 ? 's' : ''} Added',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'View Cart • ₹${cartController.cartTotalPrice.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              final quantity = cartController.getDishQuantityInCart(dish.id);
+
+              return InkWell(
+                onTap: () => _showDishDetails(dish), // <-- WRAP and CALL here
+                child: Card(
+                  margin:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class DishCard extends StatelessWidget {
-  final DishModel dish;
-
-  const DishCard({
-    super.key,
-    required this.dish,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cartController = Provider.of<CartController>(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            clipBehavior: Clip.none, // Allow button to overflow
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  dish.imageUrl,
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 120,
-                    height: 120,
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.restaurant, color: Colors.grey),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -15, // Position half-way below the image
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Consumer<CartController>(
-                    builder: (context, cart, child) {
-                      final quantityInCart = cart.getDishQuantityInCart(dish.id);
-                      if (quantityInCart == 0) {
-                        return ElevatedButton(
-                          onPressed: () => cartController.addItemToCart(dish),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              side: const BorderSide(color: Colors.green),
-                            ),
-                            elevation: 4,
-                          ),
-                          child: const Text('ADD'),
-                        );
-                      } else {
-                        return Container(
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.green),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 4,
-                                )
-                              ]
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              IconButton(
-                                constraints: const BoxConstraints(),
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                icon: const Icon(Icons.remove, size: 20, color: Colors.green),
-                                onPressed: () => cartController.decrementQuantity(dish.id),
-                              ),
                               Text(
-                                '$quantityInCart',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
+                                dish.name,
+                                style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
                               ),
-                              IconButton(
-                                constraints: const BoxConstraints(),
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                icon: const Icon(Icons.add, size: 20, color: Colors.green),
-                                onPressed: () => cartController.incrementQuantity(dish.id),
+                              const SizedBox(height: 4),
+                              Text(
+                                '₹${dish.price.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                    fontSize: 16, color: Colors.black87),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                dish.description,
+                                style: TextStyle(color: Colors.grey[600]),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
-                        );
-                      }
-                    },
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(
+                                dish.imageUrl,
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            quantity == 0
+                                ? OutlinedButton(
+                              onPressed: () {
+                                cartController.addItemToCart(dish);
+                              },
+                              child: const Text("ADD"),
+                            )
+                                : Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove, size: 18),
+                                    onPressed: () => cartController
+                                        .removeItemFromCart(dish.id),
+                                  ),
+                                  Text(quantity.toString(),
+                                      style:
+                                      const TextStyle(fontSize: 16)),
+                                  IconButton(
+                                    icon: const Icon(Icons.add, size: 18),
+                                    onPressed: () => cartController
+                                        .addItemToCart(dish),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              );
+            },
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: SizedBox(
-              height: 120,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  Text(
-                    dish.name,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    dish.description,
-                    style: TextStyle(color: Colors.grey[600]),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  Text(
-                    '₹${dish.price.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+          if (cartController.items.isNotEmpty)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                color: Colors.green[700],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "${cartController.totalItemsInCart} item added",
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => const CartView()));
+                      },
+                      child: const Row(
+                        children: [
+                          Text(
+                            "VIEW CART",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Icon(Icons.shopping_cart, color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

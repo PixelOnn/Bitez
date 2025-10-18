@@ -4,15 +4,17 @@ class UserModel {
   final String uid;
   final String phoneNumber;
   final Timestamp createdAt;
-  final String? fcmToken; // <-- ADD THIS
-  final Map<String, dynamic>? deviceInfo; // <-- ADD THIS
+  final String? fcmToken;
+  final Map<String, dynamic>? deviceInfo;
+  final String? address; // <-- ADD THIS
 
   UserModel({
     required this.uid,
     required this.phoneNumber,
     required this.createdAt,
-    this.fcmToken, // <-- ADD THIS
-    this.deviceInfo, // <-- ADD THIS
+    this.fcmToken,
+    this.deviceInfo,
+    this.address, // <-- ADD THIS
   });
 
   Map<String, dynamic> toMap() {
@@ -20,8 +22,9 @@ class UserModel {
       'uid': uid,
       'phoneNumber': phoneNumber,
       'createdAt': createdAt,
-      'fcmToken': fcmToken, // <-- ADD THIS
-      'deviceInfo': deviceInfo, // <-- ADD THIS
+      'fcmToken': fcmToken,
+      'deviceInfo': deviceInfo,
+      'address': address, // <-- ADD THIS
     };
   }
 }
