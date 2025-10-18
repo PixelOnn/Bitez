@@ -23,13 +23,13 @@ class AppTheme {
 
     // --- MODIFIED App Bar Theme ---
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.transparent, // Make AppBar transparent
-      elevation: 0, // Remove shadow
-      iconTheme: IconThemeData(color: Colors.white), // Make icons (like back arrow) white
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      iconTheme: IconThemeData(color: Colors.black), // Icons are black
       titleTextStyle: TextStyle(
           fontFamily: 'PlayfairDisplay',
-          color: Colors.white, // Make title text white
-          fontSize: 22,
+          color: Colors.black, // Title text is black
+          fontSize: 23, // <-- UPDATED from 24
           fontWeight: FontWeight.bold),
     ),
     // --- END MODIFICATION ---
@@ -37,8 +37,8 @@ class AppTheme {
     // Style for ElevatedButtons
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _buttonColor, // Updated button color
-        foregroundColor: _buttonTextColor, // Updated button text color
+        backgroundColor: _buttonColor,
+        foregroundColor: _buttonTextColor,
         shape: const StadiumBorder(),
         padding: const EdgeInsets.symmetric(vertical: 16),
         textStyle: const TextStyle(

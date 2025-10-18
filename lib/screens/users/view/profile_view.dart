@@ -183,7 +183,7 @@ class _ProfileViewState extends State<ProfileView> {
             const Spacer(),
             Text(
               _appVersion,
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: Colors.black),
             ),
           ],
         ),

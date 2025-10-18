@@ -39,7 +39,7 @@ class _HomeViewState extends State<HomeView> {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 50, 16, 12),
             decoration: const BoxDecoration(
-              color: Colors.deepPurple,
+              color: Color(0xFF1A959),
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
             ),
             child: Column(
@@ -82,7 +82,7 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildLocationHeader() {
     return Row(
       children: [
-        const Icon(Icons.location_on, color: Colors.white, size: 28),
+        const Icon(Icons.location_on, color: Colors.black, size: 28),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -107,7 +107,7 @@ class _HomeViewState extends State<HomeView> {
           ),
         ),
         IconButton(
-          icon: const Icon(Icons.person_outline, color: Colors.white, size: 28),
+          icon: const Icon(Icons.person_outline, color: Colors.black, size: 28),
           onPressed: () {
             // Navigate to the ProfileView, but without adding it to the BottomNavBar
             Navigator.push(
