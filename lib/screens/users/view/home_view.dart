@@ -1,3 +1,4 @@
+import 'package:bitez/screens/users/view/profile_view.dart';
 import 'package:bitez/screens/users/view/restaurant_card._viewdart.dart';
 import 'package:flutter/material.dart';
 import '../controller/home_controller.dart';
@@ -14,12 +15,12 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final HomeController _controller = HomeController();
   String _currentAddress = "Fetching location...";
-  late final List<CategoryModel> _categories; // <-- New list for categories
+  late final List<CategoryModel> _categories;
 
   @override
   void initState() {
     super.initState();
-    _categories = getCategoriesByTime(); // <-- Get categories based on time
+    _categories = getCategoriesByTime();
     _fetchLocation();
   }
 
@@ -35,7 +36,6 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       body: Column(
         children: [
-          // AppBar container remains the same
           Container(
             padding: const EdgeInsets.fromLTRB(16, 50, 16, 12),
             decoration: const BoxDecoration(
@@ -50,12 +50,10 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
           ),
-
-          // --- NEW CATEGORY LIST ---
           SizedBox(
-            height: 130, // Give the horizontal list a fixed height
+            height: 130,
             child: ListView.builder(
-              scrollDirection: Axis.horizontal, // This makes it scroll left-to-right
+              scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               itemCount: _categories.length,
               itemBuilder: (context, index) {
@@ -63,18 +61,13 @@ class _HomeViewState extends State<HomeView> {
               },
             ),
           ),
-          // --------------------------
-
-          // Divider for clean separation
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Divider(height: 1),
           ),
-
-          // Restaurant list remains the same
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.only(top: 8), // Add padding at the top
+              padding: const EdgeInsets.only(top: 8),
               itemCount: dummyRestaurants.length,
               itemBuilder: (context, index) {
                 return RestaurantCard(restaurant: dummyRestaurants[index]);
@@ -86,7 +79,6 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // ... _buildLocationHeader() and _buildSearchBar() methods are unchanged ...
   Widget _buildLocationHeader() {
     return Row(
       children: [
@@ -114,7 +106,16 @@ class _HomeViewState extends State<HomeView> {
             ],
           ),
         ),
-        const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+        IconButton(
+          icon: const Icon(Icons.person_outline, color: Colors.white, size: 28),
+          onPressed: () {
+            // Navigate to the ProfileView, but without adding it to the BottomNavBar
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileView()),
+            );
+          },
+        ),
       ],
     );
   }
@@ -137,3 +138,4 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 }
+
