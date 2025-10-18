@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Welcome to Kangeyam Foods!', // Your welcome text
+                  'Welcome to Judah delivery!', // Your welcome text
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
               ],
