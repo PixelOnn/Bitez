@@ -144,7 +144,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 const SizedBox(height: 10),
                 Text(
                   "We have sent the verification code to your phone number +91 ${widget.phoneNumber}",
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 16, color: Colors.black),
                 ),
                 const SizedBox(height: 40),
                 Row(
@@ -166,11 +166,11 @@ class _OtpScreenState extends State<OtpScreen> {
                           const EdgeInsets.symmetric(vertical: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
+                            borderSide: BorderSide(color: Colors.black),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
+                            borderSide: BorderSide(color: Colors.black),
                           ),
                         ),
                       ),
@@ -184,7 +184,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   child: _isTimerRunning
                       ? Text(
                     "Resend OTP in $_timerSeconds s",
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: TextStyle(color: Colors.black),
                   )
                       : TextButton(
                     onPressed: _resendOtp,

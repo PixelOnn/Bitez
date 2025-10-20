@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 10),
                   Text(
                     "Enter your phone number",
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
                   const SizedBox(height: 30),
                   const Text(
