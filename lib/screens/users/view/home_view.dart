@@ -42,15 +42,10 @@ class _HomeViewState extends State<HomeView> {
   String _currentAddress = "Fetching location...";
   late final List<EmojiCategory> _emojiCategories;
 
-  // --- UPDATED STATE FOR CAROUSEL ---
   late PageController _pageController;
   Timer? _offerCarouselTimer;
-  final int _numOfferSlides = 3; // We have 3 hardcoded slides
-
-  // Set a large initial page number to allow for "infinite" right scrolling
-  // 50001 % 3 = 0, so it starts on the first slide.
+  final int _numOfferSlides = 3;
   static const int _initialPage = 50001;
-  // ----------------------------------
 
   @override
   void initState() {
@@ -58,32 +53,26 @@ class _HomeViewState extends State<HomeView> {
     _emojiCategories = getEmojiCategoriesByTime();
     _fetchLocation();
 
-    // --- INITIALIZE CAROUSEL CONTROLLER WITH NEW INITIAL PAGE ---
     _pageController = PageController(
       viewportFraction: 0.9,
       initialPage: _initialPage,
     );
     _startOfferCarouselTimer();
-    // ----------------------------------------------------------
   }
 
-  // --- UPDATED METHOD TO START THE TIMER ---
   void _startOfferCarouselTimer() {
-    _offerCarouselTimer?.cancel(); // Cancel any existing timer
+    _offerCarouselTimer?.cancel();
     _offerCarouselTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
       if (_pageController.hasClients) {
-        // Just increment the page. The PageView.builder will handle the loop.
         int nextPage = (_pageController.page?.round() ?? 0) + 1;
-
         _pageController.animateToPage(
           nextPage,
           duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut, // This curve provides a smooth slide
+          curve: Curves.easeInOut,
         );
       }
     });
   }
-  // -----------------------------------------
 
   @override
   void dispose() {
@@ -104,40 +93,59 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          // --- (Header remains unchanged) ---
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 50, 16, 12),
-            decoration: const BoxDecoration(
-              color: Color(0xFF1DB954),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-            ),
-            child: Column(
-              children: [
-                _buildLocationHeader(),
-                const SizedBox(height: 16),
-                _buildSearchBar(),
-              ],
+      body: CustomScrollView(
+        slivers: [
+          // --- 1. YOUR STICKY GREEN HEADER ---
+          SliverAppBar(
+            pinned: true,
+            backgroundColor: const Color(0xFF1DB954),
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            toolbarHeight: 140.0,
+            flexibleSpace: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildLocationHeader(),
+                    const SizedBox(height: 16),
+                    _buildSearchBar(),
+                  ],
+                ),
+              ),
             ),
           ),
 
-          // --- 1. OFFER CAROUSEL (NOW INFINITE-SCROLLING) ---
-          _buildOfferCarousel(),
-
-          // --- (Other widgets remain unchanged) ---
-          _buildEmojiCategoryGrid(),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Divider(height: 1),
+          // --- 2. YOUR OFFER CAROUSEL (Scrolls away) ---
+          SliverToBoxAdapter(
+            child: _buildOfferCarousel(),
           ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(top: 8),
-              itemCount: dummyRestaurants.length,
-              itemBuilder: (context, index) {
+
+          // --- 3. YOUR NEW STICKY CATEGORY HEADER ---
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _StickyCategoryHeaderDelegate(
+              child: _buildEmojiCategoryGrid(),
+            ),
+          ),
+
+          // --- 4. YOUR DIVIDER (Scrolls away) ---
+          SliverToBoxAdapter(
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Divider(height: 1),
+            ),
+          ),
+
+          // --- 5. YOUR RESTAURANT LIST ---
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+                  (context, index) {
                 return RestaurantCard(restaurant: dummyRestaurants[index]);
               },
+              childCount: dummyRestaurants.length,
             ),
           ),
         ],
@@ -145,7 +153,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // --- WIDGET 1: UPDATED OFFER CAROUSEL ---
+  // --- WIDGET 1: OFFER CAROUSEL (Unchanged) ---
   Widget _buildOfferCarousel() {
     final List<Widget> offerSlides = [
       _buildOfferSlide(
@@ -172,7 +180,6 @@ class _HomeViewState extends State<HomeView> {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
         children: [
-          // (Title row remains unchanged)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -204,26 +211,21 @@ class _HomeViewState extends State<HomeView> {
             ),
           ),
           const SizedBox(height: 12),
-
-          // --- UPDATED CAROUSEL WIDGET ---
           SizedBox(
             height: 160,
             child: NotificationListener<ScrollNotification>(
               onNotification: (notification) {
                 if (notification is ScrollStartNotification) {
-                  _offerCarouselTimer?.cancel(); // Stop timer on manual drag
+                  _offerCarouselTimer?.cancel();
                 } else if (notification is ScrollEndNotification) {
-                  _startOfferCarouselTimer(); // Restart timer after drag
+                  _startOfferCarouselTimer();
                 }
                 return true;
               },
               child: PageView.builder(
                 controller: _pageController,
-                // REMOVED itemCount to make it infinite
                 itemBuilder: (context, index) {
-                  // Use modulo operator to loop through the 3 slides
                   final int effectiveIndex = index % _numOfferSlides;
-
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: offerSlides[effectiveIndex],
@@ -232,7 +234,6 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
           ),
-          // ---------------------------------
         ],
       ),
     );
@@ -300,7 +301,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // --- (Emoji grid remains unchanged) ---
+  // --- WIDGET 2: EMOJI CATEGORY GRID (FIX APPLIED HERE) ---
   Widget _buildEmojiCategoryGrid() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -312,8 +313,10 @@ class _HomeViewState extends State<HomeView> {
           mainAxisSpacing: 16,
         ),
         itemCount: _emojiCategories.length,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        // --- FIX: REMOVED THESE TWO LINES ---
+        // shrinkWrap: true, // <-- REMOVED
+        // physics: const NeverScrollableScrollPhysics(), // <-- REMOVED
+        // ------------------------------------
         itemBuilder: (context, index) {
           final category = _emojiCategories[index];
           return Column(
@@ -397,5 +400,37 @@ class _HomeViewState extends State<HomeView> {
         ),
       ),
     );
+  }
+}
+
+// --- (Sticky Header Delegate class remains unchanged) ---
+class _StickyCategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+
+  _StickyCategoryHeaderDelegate({required this.child});
+
+  // This is the height of the category grid.
+  // We estimate: (vertical padding 8*2) + (item1 height ~90) + (spacing 16) + (item2 height ~90)
+  // A fixed height of ~230-230 works well.
+  final double _height = 230.0;
+
+  @override
+  double get minExtent => _height;
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor, // Use scaffold bg
+      child: child,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_StickyCategoryHeaderDelegate oldDelegate) {
+    return child != oldDelegate.child;
   }
 }
