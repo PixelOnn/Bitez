@@ -1,19 +1,19 @@
+import 'dart:async'; // For the Timer
 import 'package:bitez/screens/users/view/profile_view.dart';
 import 'package:bitez/screens/users/view/restaurant_card._viewdart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart'; // Import this for the "See All" text
+import 'package:flutter/gestures.dart';
 import '../controller/home_controller.dart';
 import 'category_item_view.dart';
 import 'dummy_data_view.dart';
 
-// --- NEW DATA MODEL FOR EMOJI CATEGORIES ---
+// --- (Data models and functions remain unchanged) ---
 class EmojiCategory {
   final String name;
   final String emoji;
   EmojiCategory({required this.name, required this.emoji});
 }
 
-// --- NEW DATA LISTS FOR EMOJI CATEGORIES (matching your screenshot) ---
 final List<EmojiCategory> emojiCategories = [
   EmojiCategory(name: 'Hambur..', emoji: '🍔'),
   EmojiCategory(name: 'Pizza', emoji: '🍕'),
@@ -25,15 +25,8 @@ final List<EmojiCategory> emojiCategories = [
   EmojiCategory(name: 'More', emoji: '🥮'),
 ];
 
-// --- NEW FUNCTION TO GET CATEGORIES BY TIME (for the new UI) ---
-// Since the data is the same for all times in your example, we'll return the same list.
-// If you wanted different emojis for morning/night, you would change this function.
 List<EmojiCategory> getEmojiCategoriesByTime() {
   final int hour = TimeOfDay.now().hour;
-  // This data matches your screenshot and doesn't seem to change by time,
-  // so we return the main list.
-  // If you want it to change, create new lists like `morningEmojiCategories`
-  // and return them here based on the `hour`.
   return emojiCategories;
 }
 
@@ -47,23 +40,56 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final HomeController _controller = HomeController();
   String _currentAddress = "Fetching location...";
-
-  // This is the OLD category data for the OLD list.
-  // We are replacing the OLD list, but we'll leave this here for now.
-  // late final List<CategoryModel> _categories;
-
-  // --- NEW STATE VARIABLE FOR EMOJI CATEGORIES ---
   late final List<EmojiCategory> _emojiCategories;
+
+  // --- UPDATED STATE FOR CAROUSEL ---
+  late PageController _pageController;
+  Timer? _offerCarouselTimer;
+  final int _numOfferSlides = 3; // We have 3 hardcoded slides
+
+  // Set a large initial page number to allow for "infinite" right scrolling
+  // 50001 % 3 = 0, so it starts on the first slide.
+  static const int _initialPage = 50001;
+  // ----------------------------------
 
   @override
   void initState() {
     super.initState();
-    // _categories = getCategoriesByTime(); // This is for the old list
-
-    // --- INITIALIZE NEW EMOJI CATEGORIES ---
     _emojiCategories = getEmojiCategoriesByTime();
-
     _fetchLocation();
+
+    // --- INITIALIZE CAROUSEL CONTROLLER WITH NEW INITIAL PAGE ---
+    _pageController = PageController(
+      viewportFraction: 0.9,
+      initialPage: _initialPage,
+    );
+    _startOfferCarouselTimer();
+    // ----------------------------------------------------------
+  }
+
+  // --- UPDATED METHOD TO START THE TIMER ---
+  void _startOfferCarouselTimer() {
+    _offerCarouselTimer?.cancel(); // Cancel any existing timer
+    _offerCarouselTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (_pageController.hasClients) {
+        // Just increment the page. The PageView.builder will handle the loop.
+        int nextPage = (_pageController.page?.round() ?? 0) + 1;
+
+        _pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut, // This curve provides a smooth slide
+        );
+      }
+    });
+  }
+  // -----------------------------------------
+
+  @override
+  void dispose() {
+    _offerCarouselTimer?.cancel();
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _fetchLocation() async {
@@ -80,11 +106,11 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       body: Column(
         children: [
-          // --- THIS IS YOUR EXISTING HEADER (UNCHANGED) ---
+          // --- (Header remains unchanged) ---
           Container(
             padding: const EdgeInsets.fromLTRB(16, 50, 16, 12),
             decoration: const BoxDecoration(
-              color: Color(0xFF1DB954), // Fixed your color code
+              color: Color(0xFF1DB954),
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
             ),
             child: Column(
@@ -96,19 +122,15 @@ class _HomeViewState extends State<HomeView> {
             ),
           ),
 
-          // --- 1. NEW OFFER CAROUSEL (ADDED AS REQUESTED) ---
+          // --- 1. OFFER CAROUSEL (NOW INFINITE-SCROLLING) ---
           _buildOfferCarousel(),
 
-          // --- 2. NEW EMOJI CATEGORY GRID (REPLACED OLD LIST) ---
+          // --- (Other widgets remain unchanged) ---
           _buildEmojiCategoryGrid(),
-
-          // --- THIS IS YOUR EXISTING DIVIDER (UNCHANGED) ---
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Divider(height: 1),
           ),
-
-          // --- THIS IS YOUR EXISTING RESTAURANT LIST (UNCHANGED) ---
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.only(top: 8),
@@ -123,27 +145,26 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // --- WIDGET 1: NEW OFFER CAROUSEL ---
+  // --- WIDGET 1: UPDATED OFFER CAROUSEL ---
   Widget _buildOfferCarousel() {
-    // This simple list builds your 3 dummy slides
     final List<Widget> offerSlides = [
       _buildOfferSlide(
         title: "30%",
         subtitle: "DISCOUNT ONLY\nVALID FOR TODAY!",
-        color: const Color(0xFF1DB954), // Your app's green
-        imagePath: 'assets/images/img.png', // <-- YOU NEED TO ADD THIS IMAGE
+        color: const Color(0xFF1DB954),
+        imagePath: 'assets/images/img.png',
       ),
       _buildOfferSlide(
         title: "15%",
         subtitle: "DISCOUNT ON\nALL PIZZAS!",
         color: Colors.orangeAccent,
-        imagePath: 'assets/images/pizza_image.png', // <-- YOU NEED TO ADD THIS IMAGE
+        imagePath: 'assets/images/pizza_image.png',
       ),
       _buildOfferSlide(
         title: "Buy 1",
         subtitle: "GET 1 FREE\nON DRINKS!",
         color: Colors.blueAccent,
-        imagePath: 'assets/images/drink_image.png', // <-- YOU NEED TO ADD THIS IMAGE
+        imagePath: 'assets/images/drink_image.png',
       ),
     ];
 
@@ -151,7 +172,7 @@ class _HomeViewState extends State<HomeView> {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
         children: [
-          // Title row
+          // (Title row remains unchanged)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -169,13 +190,12 @@ class _HomeViewState extends State<HomeView> {
                   text: TextSpan(
                     text: 'See All',
                     style: TextStyle(
-                      color: Theme.of(context).primaryColor, // Your green
+                      color: Theme.of(context).primaryColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        // Handle "See All" tap
                         print("See All Offers tapped");
                       },
                   ),
@@ -184,26 +204,41 @@ class _HomeViewState extends State<HomeView> {
             ),
           ),
           const SizedBox(height: 12),
-          // Carousel
+
+          // --- UPDATED CAROUSEL WIDGET ---
           SizedBox(
-            height: 160, // Height for the carousel
-            child: PageView.builder(
-              controller: PageController(viewportFraction: 0.9), // Shows part of next slide
-              itemCount: offerSlides.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: offerSlides[index],
-                );
+            height: 160,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is ScrollStartNotification) {
+                  _offerCarouselTimer?.cancel(); // Stop timer on manual drag
+                } else if (notification is ScrollEndNotification) {
+                  _startOfferCarouselTimer(); // Restart timer after drag
+                }
+                return true;
               },
+              child: PageView.builder(
+                controller: _pageController,
+                // REMOVED itemCount to make it infinite
+                itemBuilder: (context, index) {
+                  // Use modulo operator to loop through the 3 slides
+                  final int effectiveIndex = index % _numOfferSlides;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: offerSlides[effectiveIndex],
+                  );
+                },
+              ),
             ),
           ),
+          // ---------------------------------
         ],
       ),
     );
   }
 
-  // Helper widget for a single slide in the carousel
+  // --- (Offer slide helper remains unchanged) ---
   Widget _buildOfferSlide({
     required String title,
     required String subtitle,
@@ -220,11 +255,7 @@ class _HomeViewState extends State<HomeView> {
           Expanded(
             flex: 2,
             child: Padding(
-              // --- THIS IS THE FIX ---
-              // Changed from EdgeInsets.all(20.0) to horizontal only
-              // This gives the Column full height to center the text.
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              // ---------------------
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -255,8 +286,7 @@ class _HomeViewState extends State<HomeView> {
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(
                 imagePath,
-                fit: BoxFit.contain, // Adjust fit as needed
-                // Error builder in case you forget to add the image
+                fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return const Center(
                     child: Text('Add Image', style: TextStyle(color: Colors.white, fontSize: 10)),
@@ -270,19 +300,20 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // --- WIDGET 2: NEW EMOJI CATEGORY GRID ---
+  // --- (Emoji grid remains unchanged) ---
   Widget _buildEmojiCategoryGrid() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4, // 4 items per row
-          childAspectRatio: 1.0, // Makes the items roughly square
+          crossAxisCount: 4,
+          childAspectRatio: 1.0,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
         itemCount: _emojiCategories.length,
-        shrinkWrap: true, // Important for in a Column
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           final category = _emojiCategories[index];
           return Column(
@@ -309,7 +340,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // --- YOUR EXISTING HEADER WIDGETS (UNCHANGED) ---
+  // --- (Header widgets remain unchanged) ---
   Widget _buildLocationHeader() {
     return Row(
       children: [
